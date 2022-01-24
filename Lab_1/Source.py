@@ -1,4 +1,4 @@
-print("Xin chào ThingsBoard")
+print("1915144 - Nguyen Cong Thanh")
 import paho.mqtt.client as mqttclient
 import time
 import json
@@ -6,7 +6,7 @@ import json
 BROKER_ADDRESS = "demo.thingsboard.io"
 PORT = 1883  # Default 1883
 THINGS_BOARD_ACCESS_TOKEN = (
-    "524TZWuSS46relJu1jC2"  # Access Token trên thingboard mình muốn gửi data
+    "0oJj8VCAcXaoRIeWJHsV"  # Access Token trên thingboard mình muốn gửi data
 )
 
 
@@ -46,8 +46,8 @@ client.loop_start()
 client.on_subscribe = subscribed
 client.on_message = recv_message
 
-temp = -30
-humi = -50
+temp = 30
+humi = 50
 light_intensity = 100
 counter = 0
 longitude = 106.7
