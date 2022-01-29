@@ -2,8 +2,13 @@ print("1915144 - Nguyen Cong Thanh")
 import paho.mqtt.client as mqttclient
 import time
 import json
-import geocoder
-from Test import getLocateByIP
+
+# Library is used to find location
+# Import modules subprocess, a module used to run new codes and applications by creating new processes
+import subprocess as sp
+import re
+
+# from Test import getLocateByIP
 
 BROKER_ADDRESS = "demo.thingsboard.io"
 PORT = 1883  # Default 1883
@@ -51,18 +56,46 @@ client.on_message = recv_message
 temp = 30
 humi = 50
 counter = 0
+longitude = 0
+latitude = 0
 
-# longitude = 107.248451
-# latitude = 16.696698
+# Source: https://stackoverflow.com/questions/44400560/using-windows-gps-location-service-in-a-python-script/44462120
+wt = 5  # Wait time -- I purposefully make it wait before the shell command
+accuracy = 3  # Starting desired accuracy is fine and builds at x1.5 per loop
 
 while True:  # Hệ thống thật chạy vô tận => Xài while true
-    # locate = getLocateByIP()
-    # latitude, longitude = locate[0], locate[1]
-    # https://stackoverflow.com/questions/63360274/get-gps-location-by-scraping-a-website-python
-    # https://stackoverflow.com/questions/24906833/how-to-access-current-location-of-any-user-using-python
-    g = geocoder.ip("me")
-    latitude = g.latlng[0]
-    longitude = g.latlng[1]
+
+    time.sleep(wt)  # Add Delay in the execution of program with wt seconds
+    pshellcomm = ["powershell"]  # Run powershell in python script
+    pshellcomm.append(
+        "add-type -assemblyname system.device; "
+        "$loc = new-object system.device.location.geocoordinatewatcher;"
+        "$loc.start(); "
+        'while(($loc.status -ne "Ready") -and ($loc.permission -ne "Denied")) '
+        "{start-sleep -milliseconds 100}; "
+        "$acc = %d; "
+        "while($loc.position.location.horizontalaccuracy -gt $acc) "
+        "{start-sleep -milliseconds 100; $acc = [math]::Round($acc*1.5)}; "
+        "$loc.position.location.latitude; "
+        "$loc.position.location.longitude; "
+        "$loc.position.location.horizontalaccuracy; "
+        "$loc.stop()" % (accuracy)
+    )
+
+    # Remove >>> $acc = [math]::Round($acc*1.5) <<< to remove accuracy builder
+    # Once removed, try setting accuracy = 10, 20, 50, 100, 1000 to see if that affects the results
+    # Note: This code will hang if your desired accuracy is too fine for your device
+    # Note: This code will hang if you interact with the Command Prompt AT ALL
+    # Try pressing ESC or CTRL-C once if you interacted with the CMD,
+    # this might allow the process to continue
+
+    p = sp.Popen(pshellcomm, stdin=sp.PIPE, stdout=sp.PIPE, stderr=sp.STDOUT, text=True)
+    (out, err) = p.communicate()
+    out = re.split("\n", out)  # Split a string into a list
+
+    latitude = float(out[0])  # Assign latitude from the output
+    longitude = float(out[1])  # Assign longitude from the output
+
     collect_data = {
         "temperature": temp,
         "humidity": humi,
