@@ -15,7 +15,7 @@ def on_data_received():
 serial.on_data_received(serial.delimiters(Delimiters.HASH), on_data_received)
 
 cmd = ""
-count = 5
+count = 10
 
 
 def on_forever():
@@ -26,7 +26,7 @@ def on_forever():
         serial.write_string("!1:LIGHT:" + ("" + str(input.light_level())) + "#")
     count += -1
     if count == 0:
-        count = 5
+        count = 10
     basic.pause(1000)
 
 
