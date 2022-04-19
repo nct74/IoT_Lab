@@ -3,6 +3,7 @@ import json
 import time
 import paho.mqtt.client as mqttclient
 
+print("1915144 - Nguyen Cong Thanh")
 print("IoT Gateway")
 
 BROKER_ADDRESS = "demo.thingsboard.io"
