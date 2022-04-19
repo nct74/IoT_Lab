@@ -24,7 +24,11 @@ def processData(data):
     splitData = data.split(":")
     print(splitData)
     # TODO: Add your source code to publish data to the server
-    # Example demo hercules: !1:temperature:74## !2:light:22##
+    # Example demo hercules: !1:TEMP:35## !2:LIGHT:33##
+    if splitData[1] == "TEMP":
+        splitData[1] = "temperature"
+    elif splitData[1] == "LIGHT":
+        splitData[1] = "light"
     collect_data = {splitData[1]: int(splitData[2])}
     # print(collect_data)
     client.publish("v1/devices/me/telemetry", json.dumps(collect_data), 1)
